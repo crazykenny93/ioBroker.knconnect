@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../src/model/DeviceRule.ts"],
+  "sourcesContent": ["export class DeviceRule {\n    deviceAlias: string;\n    deviceLogo: string;\n    deviceType: string;\n    mac: string;\n    targetPosition: number;\n\n    constructor(\n        deviceAlias: string,\n        deviceLogo: string,\n        deviceType: string,\n        mac: string,\n        targetPosition: number\n    ) {\n        this.deviceAlias = deviceAlias;\n        this.deviceLogo = deviceLogo;\n        this.deviceType = deviceType;\n        this.mac = mac;\n        this.targetPosition = targetPosition;\n    }\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAO,MAAM,WAAW;AAAA,EAOpB,YACI,aACA,YACA,YACA,KACA,gBACF;AACE,SAAK,cAAc;AACnB,SAAK,aAAa;AAClB,SAAK,aAAa;AAClB,SAAK,MAAM;AACX,SAAK,iBAAiB;AAAA,EAC1B;AACJ;",
+  "names": []
+}

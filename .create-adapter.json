@@ -1,0 +1,38 @@
+{
+    "cli": true,
+    "target": "directory",
+    "adapterName": "knconnect",
+    "title": "KN Connect",
+    "description": "KN Connect cloud adapter",
+    "expert": "no",
+    "features": [
+        "adapter"
+    ],
+    "adminFeatures": [],
+    "type": "climate-control",
+    "startMode": "daemon",
+    "connectionType": "cloud",
+    "dataSource": "push",
+    "connectionIndicator": "no",
+    "language": "TypeScript",
+    "nodeVersion": "16",
+    "adminUi": "json",
+    "tools": [
+        "ESLint"
+    ],
+    "releaseScript": "yes",
+    "devServer": "yes",
+    "devServerPort": 8222,
+    "indentation": "Space (4)",
+    "quotes": "double",
+    "es6class": "yes",
+    "authorName": "crazykenny93",
+    "authorGithub": "crazykenny93",
+    "authorEmail": "crazykenny593@gmail.com",
+    "gitRemoteProtocol": "HTTPS",
+    "gitCommit": "no",
+    "defaultBranch": "main",
+    "license": "MIT License",
+    "dependabot": "yes",
+    "creatorVersion": "2.5.0"
+}

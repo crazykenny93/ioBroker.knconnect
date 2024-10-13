@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../src/model/Scene.ts"],
+  "sourcesContent": ["import {DeviceRule} from \"./DeviceRule\";\n\nexport class Scene {\n    areaCode: string;\n    sceneCode: string;\n    sceneName: string;\n    rules: DeviceRule[];\n\n    constructor(\n        areaCode: string,\n        sceneCode: string,\n        sceneName: string,\n        rules: DeviceRule[]\n    ) {\n        this.areaCode = areaCode;\n        this.sceneCode = sceneCode;\n        this.sceneName = sceneName;\n        this.rules = rules;\n    }\n}\n\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAEO,MAAM,MAAM;AAAA,EAMf,YACI,UACA,WACA,WACA,OACF;AACE,SAAK,WAAW;AAChB,SAAK,YAAY;AACjB,SAAK,YAAY;AACjB,SAAK,QAAQ;AAAA,EACjB;AACJ;",
+  "names": []
+}

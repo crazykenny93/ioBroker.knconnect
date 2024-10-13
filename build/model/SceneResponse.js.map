@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../src/model/SceneResponse.ts"],
+  "sourcesContent": ["import {Scene} from \"./Scene\";\n\nexport class SceneResponse {\n    retCode: string;\n    scenes: Scene[];\n\n    constructor(retCode: string, scenes: Scene[]) {\n        this.retCode = retCode;\n        this.scenes = scenes;\n    }\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAEO,MAAM,cAAc;AAAA,EAIvB,YAAY,SAAiB,QAAiB;AAC1C,SAAK,UAAU;AACf,SAAK,SAAS;AAAA,EAClB;AACJ;",
+  "names": []
+}

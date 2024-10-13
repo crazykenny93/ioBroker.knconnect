@@ -1,0 +1,92 @@
+{
+  "common": {
+    "name": "knconnect",
+    "version": "0.0.1",
+    "news": {
+      "0.0.1": {
+        "en": "initial release",
+        "de": "Erstveröffentlichung",
+        "ru": "Начальная версия",
+        "pt": "lançamento inicial",
+        "nl": "Eerste uitgave",
+        "fr": "Première version",
+        "it": "Versione iniziale",
+        "es": "Versión inicial",
+        "pl": "Pierwsze wydanie",
+        "uk": "Початкова версія",
+        "zh-cn": "首次出版"
+      }
+    },
+    "title": "KN Connect",
+    "titleLang": {
+      "en": "KN Connect",
+      "de": "KN Connect",
+      "ru": "КН Коннект",
+      "pt": "KN Conectar",
+      "nl": "KN-verbinding",
+      "fr": "KN Connecter",
+      "it": "KN Connetti",
+      "es": "Conexión KN",
+      "pl": "KN Connect",
+      "uk": "KN Connect",
+      "zh-cn": "KN连接"
+    },
+    "desc": {
+      "en": "KN Connect cloud adapter",
+      "de": "KN Connect Cloud-Adapter",
+      "ru": "Облачный адаптер KN Connect",
+      "pt": "Adaptador de nuvem KN Connect",
+      "nl": "KN Connect-cloudadapter",
+      "fr": "Adaptateur cloud KN Connect",
+      "it": "Adattatore cloud KN Connect",
+      "es": "Adaptador de nube KN Connect",
+      "pl": "Adapter chmurowy KN Connect",
+      "uk": "Хмарний адаптер KN Connect",
+      "zh-cn": "KN Connect 云适配器"
+    },
+    "authors": [
+      "crazykenny93 <crazykenny593@gmail.com>"
+    ],
+    "keywords": [
+      "ioBroker",
+      "template",
+      "Smart Home",
+      "home automation"
+    ],
+    "license": "MIT",
+    "platform": "Javascript/Node.js",
+    "main": "build/main.js",
+    "icon": "knconnect.png",
+    "enabled": true,
+    "extIcon": "https://raw.githubusercontent.com/crazykenny93/ioBroker.knconnect/main/admin/knconnect.png",
+    "readme": "https://github.com/crazykenny93/ioBroker.knconnect/blob/main/README.md",
+    "loglevel": "info",
+    "mode": "daemon",
+    "type": "climate-control",
+    "compact": true,
+    "connectionType": "cloud",
+    "dataSource": "push",
+    "adminUI": {
+      "config": "json"
+    },
+    "dependencies": [
+      {
+        "js-controller": ">=3.3.22"
+      }
+    ],
+    "globalDependencies": [
+      {
+        "admin": ">=5.1.13"
+      }
+    ],
+    "tier": 3,
+    "licenseInformation": {}
+  },
+  "native": {
+    "loginName": "",
+    "password": ""
+  },
+  "objects": [],
+  "instanceObjects": [
+  ]
+}
