@@ -88,5 +88,12 @@
   },
   "objects": [],
   "instanceObjects": [
+  ],
+  "protectedNative": [
+    "password",
+    "loginName"
+  ],
+  "encryptedNative": [
+    "password"
   ]
 }

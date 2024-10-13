@@ -20,6 +20,8 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 var utils = __toESM(require("@iobroker/adapter-core"));
 var import_axios = __toESM(require("axios"));
 const BASE_URL = "https://connectoreu.shadeconnector.com:8443";
+const generateMsgId = () => new Date().toISOString().replace(/[^0-9]/g, "");
+let accessToken;
 class Knconnect extends utils.Adapter {
   constructor(options = {}) {
     super({
@@ -31,7 +33,6 @@ class Knconnect extends utils.Adapter {
     this.on("unload", this.onUnload.bind(this));
   }
   async onReady() {
-    const generateMsgId = () => new Date().toISOString().replace(/[^0-9]/g, "");
     const login = await import_axios.default.post(
       `${BASE_URL}/userCenter/user/login`,
       new URLSearchParams({
@@ -41,7 +42,7 @@ class Knconnect extends utils.Adapter {
         msgId: generateMsgId()
       })
     );
-    const accessToken = login.data.accessToken;
+    accessToken = login.data.accessToken;
     const scenes = await import_axios.default.post(
       `${BASE_URL}/userCenter/sceneService/getScenes`,
       new URLSearchParams({
@@ -109,9 +110,19 @@ class Knconnect extends utils.Adapter {
       callback();
     }
   }
-  onStateChange(id, state) {
+  async onStateChange(id, state) {
     if (state) {
-      if (id.endsWith(".triggerScene")) {
+      if (id.endsWith(".triggerScene") && state.val !== null) {
+        this.log.info(`trigger scene: ${state.val}`);
+        await import_axios.default.post(
+          `${BASE_URL}/userCenter/sceneService/triggerScene`,
+          new URLSearchParams({
+            accessToken,
+            msgId: generateMsgId(),
+            sceneCode: state.val
+          })
+        );
+        this.setState("triggerScene", null);
       }
       this.log.info(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
     } else {

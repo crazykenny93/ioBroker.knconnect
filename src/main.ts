@@ -10,6 +10,8 @@ import {SceneResponse} from "./model/SceneResponse";
 
 const BASE_URL: string = "https://connectoreu.shadeconnector.com:8443";
 
+const generateMsgId = (): string => new Date().toISOString().replace(/[^0-9]/g, "");
+let accessToken: string;
 
 class Knconnect extends utils.Adapter {
 
@@ -31,8 +33,6 @@ class Knconnect extends utils.Adapter {
     private async onReady(): Promise<void> {
         // Initialize your adapter here
 
-        const generateMsgId = (): string => new Date().toISOString().replace(/[^0-9]/g, "");
-
         const login = await axios.post(
             `${BASE_URL}/userCenter/user/login`,
             new URLSearchParams({
@@ -43,7 +43,7 @@ class Knconnect extends utils.Adapter {
             })
         )
 
-        const accessToken = login.data.accessToken;
+        accessToken = login.data.accessToken;
 
         const scenes = await axios.post<SceneResponse>(
             `${BASE_URL}/userCenter/sceneService/getScenes`,
@@ -158,11 +158,21 @@ class Knconnect extends utils.Adapter {
     /**
      * Is called if a subscribed state changes
      */
-    private onStateChange(id: string, state: ioBroker.State | null | undefined): void {
+    private async onStateChange(id: string, state: ioBroker.State | null | undefined): Promise<void> {
         if (state) {
             // The state was changed
-            if (id.endsWith(".triggerScene")) {
-                //Trigger Scene here
+            if (id.endsWith(".triggerScene") && state.val !== null) {
+                this.log.info(`trigger scene: ${state.val}`);
+                await axios.post(
+                    `${BASE_URL}/userCenter/sceneService/triggerScene`,
+                    new URLSearchParams({
+                        accessToken: accessToken,
+                        msgId: generateMsgId(),
+                        sceneCode: state.val as string
+                    })
+                )
+
+                this.setState("triggerScene", null)
             }
             this.log.info(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
         } else {
