@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "knconnect",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "news": {
+      "0.0.3": {
+        "en": "Automatically renew rejected access tokens and retry scene commands once.\nFix release metadata and update development dependencies for Node.js 22.",
+        "de": "Erneuert automatisch abgelehnte Zugriffstoken und Szenenbefehle.\nKorrigiert Release-Metadaten und Entwicklungsabhängigkeiten für Node.js 22.",
+        "ru": "Автоматически обновляйте отклоненные токены доступа и повторяйте команды сцены один раз.\nИсправьте метаданные релиза и обновите зависимости разработки для Node.js 22.",
+        "pt": "Renove automaticamente tokens rejeitados e repita comandos de cena.\nCorrija os metadados da versão e atualize as dependências do Node.js 22.",
+        "nl": "Verleng automatisch geweigerde toegangstokens en probeer de opdrachten voor scènes één keer opnieuw uit.\nMetagegevens van de release herstellen en ontwikkelingsafhankelijkheden bijwerken voor Node.js 22.",
+        "fr": "Renouvelez automatiquement les accès refusés et réessayez une fois.\nCorrigez les métadonnées et mettez à jour les dépendances de développement pour Node.js 22.",
+        "it": "Rinnova automaticamente i token di accesso rifiutati e riprova una volta.\nCorregge i metadati di rilascio e aggiorna le dipendenze di Node.js 22.",
+        "es": "Renovar automáticamente los accesos rechazados y reintentar los comandos de escena\nCorrija los metadatos de la versión y actualice las dependencias de Node.js 22.",
+        "pl": "Automatycznie odnawiaj odrzucone tokeny dostępu i spróbuj ponownie raz poleceń sceny.\nNapraw metadane wydania i zaktualizuj zależności programistyczne dla Node.js 22.",
+        "uk": "Автоматично поновіть відхилені токени доступу та повторіть команди сцени один раз.\nВиправлено метадані випуску та залежності розробки оновлень для Node.js 22.",
+        "zh-cn": "自动续订被拒绝的访问令牌并重试场景命令一次。\n修复 Node.js 22 的发布元数据并更新开发依赖关系。"
+      },
       "0.0.2": {
         "en": "Automatically renew rejected access tokens and retry scene commands once.",
         "de": "Abgewiesene Access-Tokens automatisch erneuern und Szenenbefehle einmal wiederholen.",
@@ -102,8 +115,7 @@
     "password": ""
   },
   "objects": [],
-  "instanceObjects": [
-  ],
+  "instanceObjects": [],
   "protectedNative": [
     "password",
     "loginName"
