@@ -11,9 +11,10 @@ import {SceneResponse} from "./model/SceneResponse";
 const BASE_URL: string = "https://connectoreu.shadeconnector.com:8443";
 
 const generateMsgId = (): string => new Date().toISOString().replace(/[^0-9]/g, "");
-let accessToken: string;
 
 class Knconnect extends utils.Adapter {
+    private accessToken = "";
+    private loginPromise?: Promise<void>;
 
     public constructor(options: Partial<utils.AdapterOptions> = {}) {
         super({
@@ -27,12 +28,7 @@ class Knconnect extends utils.Adapter {
         this.on("unload", this.onUnload.bind(this));
     }
 
-    /**
-     * Is called when databases are connected and adapter received configuration.
-     */
-    private async onReady(): Promise<void> {
-        // Initialize your adapter here
-
+    private async requestAccessToken(): Promise<void> {
         const login = await axios.post(
             `${BASE_URL}/userCenter/user/login`,
             new URLSearchParams({
@@ -41,19 +37,70 @@ class Knconnect extends utils.Adapter {
                 appCode: "c62c8a8c-4b35-4783-9168-65b06a12a77d",
                 msgId: generateMsgId()
             })
-        )
+        );
 
-        accessToken = login.data.accessToken;
+        const token = login.data?.accessToken;
+        if (typeof token !== "string" || token.trim() === "") {
+            throw new Error("KN Connect login returned no access token");
+        }
+        this.accessToken = token;
+    }
 
-        const scenes = await axios.post<SceneResponse>(
-            `${BASE_URL}/userCenter/sceneService/getScenes`,
-            new URLSearchParams({
-                accessToken: accessToken,
-                msgId: generateMsgId()
-            })
-        )
+    private async login(): Promise<void> {
+        // Concurrent commands share one login instead of invalidating each other's token.
+        if (!this.loginPromise) {
+            this.loginPromise = this.requestAccessToken().finally(() => {
+                this.loginPromise = undefined;
+            });
+        }
+        await this.loginPromise;
+    }
 
-        this.log.info("Scenes: " + JSON.stringify(scenes.data));
+    private async authenticatedPost<T>(path: string, params: Record<string, string> = {}): Promise<T> {
+        if (!this.accessToken) await this.login();
+
+        for (let attempt = 0; attempt < 2; attempt++) {
+            const token = this.accessToken;
+            try {
+                const response = await axios.post<T & { retCode?: string }>(
+                    `${BASE_URL}${path}`,
+                    new URLSearchParams({ ...params, accessToken: token, msgId: generateMsgId() })
+                );
+                // The cloud reports token errors in an HTTP 200 response as well.
+                if (String(response.data?.retCode) !== "20108") return response.data;
+            } catch (error) {
+                const status = (error as { response?: { status?: number } } | null)?.response?.status;
+                // Never repeat commands after timeouts or other ambiguous failures.
+                if (status !== 401) throw error;
+            }
+
+            if (attempt === 1) {
+                if (this.accessToken === token) this.accessToken = "";
+                throw new Error("KN Connect rejected the renewed access token");
+            }
+
+            this.log.info("KN Connect token rejected; renewing login and retrying once.");
+            // A concurrent request may already have obtained a new token.
+            if (this.accessToken === token) await this.login();
+        }
+        throw new Error("KN Connect authentication failed");
+    }
+
+    /**
+     * Is called when databases are connected and adapter received configuration.
+     */
+    private async onReady(): Promise<void> {
+        let scenes: SceneResponse;
+        try {
+            await this.login();
+            scenes = await this.authenticatedPost<SceneResponse>("/userCenter/sceneService/getScenes");
+        } catch {
+            // Axios errors can contain the request body, including credentials/tokens.
+            this.log.error("KN Connect login or scene loading failed. Check credentials and cloud availability.");
+            return;
+        }
+
+        this.log.info("Scenes: " + JSON.stringify(scenes));
 
         this.setObjectNotExistsAsync("scenes", {
             type: "channel",
@@ -83,7 +130,7 @@ class Knconnect extends utils.Adapter {
             native: {}
         })
 
-        for (const scene of scenes.data.scenes) {
+        for (const scene of scenes.scenes) {
             this.setObjectNotExists(`scenes.${scene.sceneCode}`, {
                 type: "channel",
                 common: {
@@ -116,11 +163,11 @@ class Knconnect extends utils.Adapter {
 
 
         // examples for the checkPassword/checkGroup functions
-        let result = await this.checkPasswordAsync("admin", "iobroker");
-        this.log.info("check user admin pw iobroker: " + result);
+        const passwordResult = await this.checkPasswordAsync("admin", "iobroker");
+        this.log.info("check user admin pw iobroker: " + passwordResult);
 
-        result = await this.checkGroupAsync("admin", "admin");
-        this.log.info("check group user admin group admin: " + result);
+        const groupResult = await this.checkGroupAsync("admin", "admin");
+        this.log.info("check group user admin group admin: " + groupResult);
     }
 
     /**
@@ -161,18 +208,17 @@ class Knconnect extends utils.Adapter {
     private async onStateChange(id: string, state: ioBroker.State | null | undefined): Promise<void> {
         if (state) {
             // The state was changed
-            if (id.endsWith(".triggerScene") && state.val !== null) {
+            if (id.endsWith(".triggerScene") && !state.ack && typeof state.val === "string" && state.val.trim() !== "") {
                 this.log.info(`trigger scene: ${state.val}`);
-                await axios.post(
-                    `${BASE_URL}/userCenter/sceneService/triggerScene`,
-                    new URLSearchParams({
-                        accessToken: accessToken,
-                        msgId: generateMsgId(),
-                        sceneCode: state.val as string
-                    })
-                )
-
-                this.setState("triggerScene", null)
+                try {
+                    await this.authenticatedPost("/userCenter/sceneService/triggerScene", {
+                        sceneCode: state.val,
+                    });
+                } catch {
+                    this.log.error("KN Connect scene could not be triggered. Check credentials and cloud availability.");
+                } finally {
+                    this.setState("triggerScene", { val: null, ack: true });
+                }
             }
             this.log.info(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
         } else {

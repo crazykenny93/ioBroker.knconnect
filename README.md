@@ -14,6 +14,15 @@
 
 KN Connect cloud adapter
 
+### Automatische Token-Erneuerung
+
+Bei einem Tokenfehler (`retCode: 20108` oder HTTP 401) meldet sich der Adapter
+mit den konfigurierten Zugangsdaten erneut an und wiederholt die betroffene
+Szenenabfrage bzw. den Jalousienbefehl genau einmal. Gleichzeitige Befehle teilen
+sich die Anmeldung. Dafür wird ein neues Access-Token über den bestehenden Login
+abgerufen; ein separater Refresh-Token-Endpunkt wird nicht verwendet.
+Netzwerkfehler lösen keine automatische Befehlswiederholung aus.
+
 ## Developer manual
 This section is intended for the developer. It can be deleted later.
 
@@ -80,6 +89,11 @@ clear upsides.
 The template provides you with basic tests for the adapter startup and package files.
 It is recommended that you add your own tests into the mix.
 
+`src/main.test.ts` prüft die Token-Erneuerung mit simulierten ioBroker- und
+Cloud-Aufrufen, ohne Gerätezugriff. Bei Node.js 26 für den vorhandenen
+ts-node-Testlauf `NODE_OPTIONS=--no-experimental-strip-types npm run test:ts`
+verwenden. Ein Test mit einer tatsächlich abgelaufenen Cloud-Sitzung steht aus.
+
 ### Publishing the adapter
 Using GitHub Actions, you can enable automatic releases on npm whenever you push a new git tag that matches the form 
 `v<major>.<minor>.<patch>`. We **strongly recommend** that you do. The necessary steps are described in `.github/workflows/test-and-release.yml`.
@@ -113,7 +127,10 @@ Please refer to the [`dev-server` documentation](https://github.com/ioBroker/dev
     ### **WORK IN PROGRESS**
 -->
 
-### **WORK IN PROGRESS**
+### 0.0.2 (2026-11-10)
+* Automatically renew rejected access tokens and retry scene commands once.
+
+### 0.0.1
 * (crazykenny93) initial release
 
 ## License

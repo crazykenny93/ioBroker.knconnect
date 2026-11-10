@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "knconnect",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "news": {
+      "0.0.2": {
+        "en": "Automatically renew rejected access tokens and retry scene commands once.",
+        "de": "Abgewiesene Access-Tokens automatisch erneuern und Szenenbefehle einmal wiederholen.",
+        "ru": "Автоматическое обновление отклонённых токенов доступа и однократный повтор команд сцен.",
+        "pt": "Renova automaticamente os tokens de acesso rejeitados e repete os comandos de cena uma vez.",
+        "nl": "Geweigerde toegangstokens automatisch vernieuwen en scèneopdrachten eenmaal herhalen.",
+        "fr": "Renouvellement automatique des jetons d’accès rejetés et nouvelle tentative unique des commandes de scène.",
+        "it": "Rinnovo automatico dei token di accesso rifiutati e un solo nuovo tentativo per i comandi delle scene.",
+        "es": "Renovación automática de los tokens de acceso rechazados y un único reintento de los comandos de escena.",
+        "pl": "Automatyczne odnawianie odrzuconych tokenów dostępu i jednokrotne ponawianie poleceń scen.",
+        "uk": "Автоматичне оновлення відхилених токенів доступу та одноразове повторення команд сцен.",
+        "zh-cn": "自动更新被拒绝的访问令牌，并重试场景命令一次。"
+      },
       "0.0.1": {
         "en": "initial release",
         "de": "Erstveröffentlichung",
