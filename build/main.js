@@ -14,17 +14,13 @@ var __copyProps = (to, from, except, desc) => {
   return to;
 };
 var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
-  // If the importer is in node compatibility mode or this is not an ESM
-  // file that has been converted to a CommonJS file using a Babel-
-  // compatible transform (i.e. "__esModule" has not been set), then set
-  // "default" to the CommonJS "module.exports" for node compatibility.
   isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
   mod
 ));
 var utils = __toESM(require("@iobroker/adapter-core"));
 var import_axios = __toESM(require("axios"));
 const BASE_URL = "https://connectoreu.shadeconnector.com:8443";
-const generateMsgId = () => (/* @__PURE__ */ new Date()).toISOString().replace(/[^0-9]/g, "");
+const generateMsgId = () => new Date().toISOString().replace(/[^0-9]/g, "");
 class Knconnect extends utils.Adapter {
   constructor(options = {}) {
     super({
@@ -63,7 +59,8 @@ class Knconnect extends utils.Adapter {
   }
   async authenticatedPost(path, params = {}) {
     var _a, _b;
-    if (!this.accessToken) await this.login();
+    if (!this.accessToken)
+      await this.login();
     for (let attempt = 0; attempt < 2; attempt++) {
       const token = this.accessToken;
       try {
@@ -71,23 +68,24 @@ class Knconnect extends utils.Adapter {
           `${BASE_URL}${path}`,
           new URLSearchParams({ ...params, accessToken: token, msgId: generateMsgId() })
         );
-        if (String((_a = response.data) == null ? void 0 : _a.retCode) !== "20108") return response.data;
+        if (String((_a = response.data) == null ? void 0 : _a.retCode) !== "20108")
+          return response.data;
       } catch (error) {
         const status = (_b = error == null ? void 0 : error.response) == null ? void 0 : _b.status;
-        if (status !== 401) throw error;
+        if (status !== 401)
+          throw error;
       }
       if (attempt === 1) {
-        if (this.accessToken === token) this.accessToken = "";
+        if (this.accessToken === token)
+          this.accessToken = "";
         throw new Error("KN Connect rejected the renewed access token");
       }
       this.log.info("KN Connect token rejected; renewing login and retrying once.");
-      if (this.accessToken === token) await this.login();
+      if (this.accessToken === token)
+        await this.login();
     }
     throw new Error("KN Connect authentication failed");
   }
-  /**
-   * Is called when databases are connected and adapter received configuration.
-   */
   async onReady() {
     let scenes;
     try {
@@ -150,9 +148,6 @@ class Knconnect extends utils.Adapter {
     const groupResult = await this.checkGroupAsync("admin", "admin");
     this.log.info("check group user admin group admin: " + groupResult);
   }
-  /**
-   * Is called when adapter shuts down - callback has to be called under any circumstances!
-   */
   onUnload(callback) {
     try {
       callback();
@@ -160,23 +155,6 @@ class Knconnect extends utils.Adapter {
       callback();
     }
   }
-  // If you need to react to object changes, uncomment the following block and the corresponding line in the constructor.
-  // You also need to subscribe to the objects with `this.subscribeObjects`, similar to `this.subscribeStates`.
-  // /**
-  //  * Is called if a subscribed object changes
-  //  */
-  // private onObjectChange(id: string, obj: ioBroker.Object | null | undefined): void {
-  //     if (obj) {
-  //         // The object was changed
-  //         this.log.info(`object ${id} changed: ${JSON.stringify(obj)}`);
-  //     } else {
-  //         // The object was deleted
-  //         this.log.info(`object ${id} deleted`);
-  //     }
-  // }
-  /**
-   * Is called if a subscribed state changes
-   */
   async onStateChange(id, state) {
     if (state) {
       if (id.endsWith(".triggerScene") && !state.ack && typeof state.val === "string" && state.val.trim() !== "") {

@@ -14,6 +14,8 @@
 
 KN Connect cloud adapter
 
+Node.js >=22.19.0 erforderlich; lokal mit Node.js 22.23.2 geprüft.
+
 ### Automatische Token-Erneuerung
 
 Bei einem Tokenfehler (`retCode: 20108` oder HTTP 401) meldet sich der Adapter
@@ -90,9 +92,9 @@ The template provides you with basic tests for the adapter startup and package f
 It is recommended that you add your own tests into the mix.
 
 `src/main.test.ts` prüft die Token-Erneuerung mit simulierten ioBroker- und
-Cloud-Aufrufen, ohne Gerätezugriff. Bei Node.js 26 für den vorhandenen
-ts-node-Testlauf `NODE_OPTIONS=--no-experimental-strip-types npm run test:ts`
-verwenden. Ein Test mit einer tatsächlich abgelaufenen Cloud-Sitzung steht aus.
+Cloud-Aufrufen, ohne Gerätezugriff. `npm run test:ts` berücksichtigt automatisch
+die native Typentfernung neuerer Node.js-Versionen und verwendet weiterhin ts-node.
+Ein Test mit einer tatsächlich abgelaufenen Cloud-Sitzung steht aus.
 
 ### Publishing the adapter
 Using GitHub Actions, you can enable automatic releases on npm whenever you push a new git tag that matches the form 
@@ -103,6 +105,10 @@ release simply by calling:
 ```bash
 npm run release
 ```
+Der Release prüft aktuelle Copyright-Jahre in `LICENSE` und `README.md` und
+benötigt einen nicht leeren Eintrag unter `### **WORK IN PROGRESS**`.
+Nach dem Release wird ein neuer Platzhalter angelegt. Zum Prüfen ohne Release:
+`npm run release -- patch --dry --noPush --yes`.
 Additional command line options for the release script are explained in the
 [release-script documentation](https://github.com/AlCalzone/release-script#command-line).
 
@@ -129,6 +135,7 @@ Please refer to the [`dev-server` documentation](https://github.com/ioBroker/dev
 
 ### **WORK IN PROGRESS**
 * Automatically renew rejected access tokens and retry scene commands once.
+* Fix release metadata and update development dependencies for Node.js 22.
 
 ### 0.0.1
 * (crazykenny93) initial release
@@ -136,7 +143,7 @@ Please refer to the [`dev-server` documentation](https://github.com/ioBroker/dev
 ## License
 MIT License
 
-Copyright (c) 2023 crazykenny93 <crazykenny593@gmail.com>
+Copyright (c) 2023-2026 crazykenny93 <crazykenny593@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
