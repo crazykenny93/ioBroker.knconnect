@@ -127,7 +127,7 @@ Please refer to the [`dev-server` documentation](https://github.com/ioBroker/dev
     ### **WORK IN PROGRESS**
 -->
 
-### 0.0.2 (2026-11-10)
+### **WORK IN PROGRESS**
 * Automatically renew rejected access tokens and retry scene commands once.
 
 ### 0.0.1
