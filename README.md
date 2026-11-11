@@ -132,6 +132,8 @@ Please refer to the [`dev-server` documentation](https://github.com/ioBroker/dev
     Placeholder for the next version (at the beginning of the line):
     ### **WORK IN PROGRESS**
 -->
+### **WORK IN PROGRESS**
+
 ### 0.0.3 (2026-11-10)
 * Automatically renew rejected access tokens and retry scene commands once.
 * Fix release metadata and update development dependencies for Node.js 22.
