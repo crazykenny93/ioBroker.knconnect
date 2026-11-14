@@ -25,6 +25,33 @@ sich die Anmeldung. Dafür wird ein neues Access-Token über den bestehenden Log
 abgerufen; ein separater Refresh-Token-Endpunkt wird nicht verwendet.
 Netzwerkfehler lösen keine automatische Befehlswiederholung aus.
 
+### Szenen, Jalousien und Räume
+
+Beim Adapterstart werden alle Cloud-Szenen, unterstützten Jalousien und Räume
+neu eingelesen. Kanalnamen entsprechen den Namen in KN Connect; die IDs bleiben
+auch bei einer Umbenennung gleich.
+
+| Datenpunkt unter `knconnect.0` | Schreiben |
+|---|---|
+| `scenes.<sceneCode>.trigger` | `true` führt die Szene aus |
+| `triggerScene` | Szenencode; bestehende Skripte bleiben kompatibel |
+| `devices.<deviceId>.open` / `.close` / `.stop` | `true` steuert diese Jalousie |
+| `devices.<deviceId>.targetPosition` | Zielposition 0–100 %, 0 = offen, 100 = geschlossen |
+| `rooms.<areaCode>.open` / `.close` / `.stop` | `true` steuert alle zugeordneten Jalousien |
+| `rooms.<areaCode>.targetPosition` | Zielposition für alle zugeordneten Jalousien |
+| `rooms.<areaCode>.deviceIds` | JSON-Array der Jalousie-IDs, z. B. `["AABBCCDDEEFF0001"]` |
+
+Raumnamen werden über `areaService/getAreas` geladen. Die geprüfte Geräteabfrage
+liefert keine Raumzuordnung und ignoriert einen `areaCode`-Filter. Deshalb muss
+`deviceIds` einmal passend zur App gesetzt werden. Die Zuordnung bleibt über
+Neustarts erhalten und lässt sich später in ioBroker ändern. Unbekannte IDs
+oder ungültiges JSON verhindern einen Raumbefehl; eine leere Liste steuert nichts.
+
+Taster werden nach dem Versuch mit `ack: true` auf `false` zurückgesetzt.
+`targetPosition` enthält den zuletzt bestätigten **Sollwert**, keine gemessene
+Position. Der Adapter fragt keine laufenden Positionsänderungen ab. Eine
+Cloud-Bestätigung belegt noch keine tatsächliche Bewegung.
+
 ## Developer manual
 This section is intended for the developer. It can be deleted later.
 
@@ -91,7 +118,7 @@ clear upsides.
 The template provides you with basic tests for the adapter startup and package files.
 It is recommended that you add your own tests into the mix.
 
-`src/main.test.ts` prüft die Token-Erneuerung mit simulierten ioBroker- und
+`src/main.test.ts` prüft Szenen-, Jalousien- und Raumsteuerung sowie die Token-Erneuerung mit simulierten ioBroker- und
 Cloud-Aufrufen, ohne Gerätezugriff. `npm run test:ts` berücksichtigt automatisch
 die native Typentfernung neuerer Node.js-Versionen und verwendet weiterhin ts-node.
 Ein Test mit einer tatsächlich abgelaufenen Cloud-Sitzung steht aus.
@@ -133,6 +160,8 @@ Please refer to the [`dev-server` documentation](https://github.com/ioBroker/dev
     ### **WORK IN PROGRESS**
 -->
 ### **WORK IN PROGRESS**
+* Add scene buttons, individual blind controls and persistent room assignments with room controls.
+* Confirm read-only scene names and reject cloud command errors.
 
 ### 0.0.3 (2026-11-10)
 * Automatically renew rejected access tokens and retry scene commands once.
