@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "knconnect",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "news": {
+      "0.0.4": {
+        "en": "Add scene buttons, individual blind controls and persistent room assignments with room controls.\nConfirm read-only scene names and reject cloud command errors.",
+        "de": "Fügen Sie Szenetasten, Rollläden und ständige Raumzuweisungen mit Raumsteuerung hinzu.\nBestätigen Sie lesbare Szenennamen und lehnen Sie Cloud-Fehler ab.",
+        "ru": "Добавляйте кнопки сцены, отдельные элементы управления жалюзи и постоянные назначения комнат с помощью элементов управления помещениями.\nПодтвердите имена сцен, доступные только для чтения, и отклоните ошибки облачных команд.",
+        "pt": "Adicione botões de cena, controles de persianas e tarefas contínuas com controles de sala.\nConfirme cenas lidas e rejeite erros de comando na nuvem.",
+        "nl": "Voeg sceneknoppen, individuele jaloeziebediening en permanente kamertoewijzingen toe met kamerbedieningen.\nBevestig de namen van scènes die alleen kunnen worden gelezen en weiger fouten in de cloud.",
+        "fr": "Ajoutez des boutons de scène, des commandes individuelles et une assignation permanente des pièces.\nVérifiez les noms des scènes en lecture seule et rejetez les commandes cloud.",
+        "it": "Aggiunga pulsanti di scena, controlli individuali e assegnazioni permanenti delle camere.\nConfermi i nomi di sola lettura e rifiuti i comandi cloud.",
+        "es": "Añada botones de escena, controles de persianas individuales y asignación de habitación persistente con controles.\nConfirme nombres de escenas de solo lectura y rechace errores de comando",
+        "pl": "Dodaj przyciski sceny, indywidualne elementy sterujące w ciemno i trwałe przypisania pomieszczeń za pomocą elementów sterujących pomieszczeniem.\nPotwierdź nazwy scen tylko do odczytu i odrzuć błędy poleceń w chmurze.",
+        "uk": "Додайте кнопки сцени, індивідуальні елементи керування жалюзі та постійні призначення кімнат за допомогою елементів керування кімнатами.\nПідтвердіть назви сцени лише для читання та відхиліть помилки команд хмари.",
+        "zh-cn": "使用房间控制添加场景按钮、个人百叶窗控制和持续的房间分配。\n确认只读场景名称并拒绝云命令错误。"
+      },
       "0.0.3": {
         "en": "Automatically renew rejected access tokens and retry scene commands once.\nFix release metadata and update development dependencies for Node.js 22.",
         "de": "Erneuert automatisch abgelehnte Zugriffstoken und Szenenbefehle.\nKorrigiert Release-Metadaten und Entwicklungsabhängigkeiten für Node.js 22.",

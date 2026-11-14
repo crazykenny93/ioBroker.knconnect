@@ -159,7 +159,7 @@ Please refer to the [`dev-server` documentation](https://github.com/ioBroker/dev
     Placeholder for the next version (at the beginning of the line):
     ### **WORK IN PROGRESS**
 -->
-### **WORK IN PROGRESS**
+### 0.0.4 (2026-11-14)
 * Add scene buttons, individual blind controls and persistent room assignments with room controls.
 * Confirm read-only scene names and reject cloud command errors.
 
