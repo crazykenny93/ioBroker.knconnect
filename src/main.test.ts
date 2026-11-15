@@ -336,6 +336,101 @@ describe("KN Connect scene, device and room controls", () => {
         expect(commands("/deviceControl")).to.have.length(3);
     });
 
+    it("creates a global position trigger and read-only position states without polling at startup", () => {
+        expect(adapter.setObjectNotExistsAsync.calledWith("refreshPositions")).to.equal(true);
+        expect(adapter.subscribeStates.calledWith("refreshPositions")).to.equal(true);
+        expect(adapter.setObjectNotExistsAsync.calledWith("devices.AABBCCDDEEFF0001.currentPosition", sinon.match({
+            common: { type: "number", read: true, write: false, min: 0, max: 100 },
+        }))).to.equal(true);
+        expect(commands("/getDeviceInfo")).to.have.length(0);
+    });
+
+    function positionResponse(mac: string, deviceData: unknown) {
+        return { data: { retCode: "20000", mac, deviceType: "10000000", deviceData } };
+    }
+
+    it("reads all child positions, confirms them and resets the trigger without moving blinds", async () => {
+        post.withArgs(`${BASE_URL}/userCenter/deviceService/getDeviceInfo`).callsFake(async (_url: string, params: URLSearchParams) =>
+            positionResponse(params.get("mac")!, params.get("mac") === "AABBCCDDEEFF0001" ?
+                JSON.stringify({ currentPosition: 0 }) : { currentPosition: 100 }));
+        await change("refreshPositions", true);
+        const requests = commands("/getDeviceInfo");
+        expect(requests.map(p => p.get("mac"))).to.have.members(["AABBCCDDEEFF0001", "AABBCCDDEEFF0002"]);
+        expect(requests.every(p => p.get("deviceType") === "10000000" && p.get("accessToken") === "token")).to.equal(true);
+        expect(adapter.setStateAsync.calledWith("devices.AABBCCDDEEFF0001.currentPosition", { val: 0, ack: true })).to.equal(true);
+        expect(adapter.setStateAsync.calledWith("devices.AABBCCDDEEFF0002.currentPosition", { val: 100, ack: true })).to.equal(true);
+        expect(adapter.setStateAsync.calledWith("devices.AABBCCDDEEFF0001.positionUpdatedAt", sinon.match({ val: sinon.match.number, ack: true }))).to.equal(true);
+        expect(adapter.setStateAsync.calledWith("refreshPositions", { val: false, ack: true })).to.equal(true);
+        expect(commands("/deviceControl")).to.have.length(0);
+        expect(commands("/triggerScene")).to.have.length(0);
+    });
+
+    it("keeps previous positions on bad data and continues with other blinds", async () => {
+        post.withArgs(`${BASE_URL}/userCenter/deviceService/getDeviceInfo`).callsFake(async (_url: string, params: URLSearchParams) =>
+            positionResponse(params.get("mac")!, params.get("mac") === "AABBCCDDEEFF0001" ?
+                "not-json" : { currentPosition: 42 }));
+        adapter.setStateAsync.resetHistory();
+        await change("refreshPositions", true);
+        expect(adapter.setStateAsync.calledWith("devices.AABBCCDDEEFF0001.currentPosition")).to.equal(false);
+        expect(adapter.setStateAsync.calledWith("devices.AABBCCDDEEFF0001.positionUpdatedAt")).to.equal(false);
+        expect(adapter.setStateAsync.calledWith("devices.AABBCCDDEEFF0002.currentPosition", { val: 42, ack: true })).to.equal(true);
+        expect(adapter.log.warn.calledOnce).to.equal(true);
+    });
+
+    it("rejects missing, out-of-range and nonnumeric positions without fabricating zero", async () => {
+        for (const value of [null, "0", -1, 101, undefined]) {
+            adapter.setStateAsync.resetHistory();
+            post.withArgs(`${BASE_URL}/userCenter/deviceService/getDeviceInfo`).callsFake(async (_url: string, params: URLSearchParams) =>
+                positionResponse(params.get("mac")!, { currentPosition: value }));
+            await change("refreshPositions", true);
+            expect(adapter.setStateAsync.calledWith("devices.AABBCCDDEEFF0001.currentPosition")).to.equal(false);
+        }
+    });
+
+    it("waits for startup discovery before refreshing every blind", async () => {
+        let finishDiscovery!: (response: unknown) => void;
+        post.withArgs(`${BASE_URL}/userCenter/deviceService/listWithSlaves`).returns(new Promise(resolve => { finishDiscovery = resolve; }));
+        post.withArgs(`${BASE_URL}/userCenter/deviceService/getDeviceInfo`).callsFake(async (_url: string, params: URLSearchParams) =>
+            positionResponse(params.get("mac")!, { currentPosition: 50 }));
+        adapter = createAdapter();
+        const startup = adapter.listeners("ready")[0]();
+        await new Promise(resolve => setImmediate(resolve));
+        const refresh = change("refreshPositions", true);
+        expect(commands("/getDeviceInfo")).to.have.length(0);
+        finishDiscovery({ data: { retCode: "20000", devices } });
+        await Promise.all([startup, refresh]);
+        expect(commands("/getDeviceInfo").map(p => p.get("mac"))).to.have.members(["AABBCCDDEEFF0001", "AABBCCDDEEFF0002"]);
+    });
+
+    it("shares overlapping position refreshes and ignores acknowledged or false triggers", async () => {
+        let finish!: (response: unknown) => void;
+        post.withArgs(`${BASE_URL}/userCenter/deviceService/getDeviceInfo`).callsFake((_url: string, params: URLSearchParams) =>
+            params.get("mac") === "AABBCCDDEEFF0001" ? new Promise(resolve => { finish = resolve; }) :
+                Promise.resolve(positionResponse("AABBCCDDEEFF0002", { currentPosition: 20 })));
+        const first = change("refreshPositions", true);
+        const second = change("refreshPositions", true);
+        await new Promise(resolve => setImmediate(resolve));
+        expect(commands("/getDeviceInfo")).to.have.length(2);
+        finish(positionResponse("AABBCCDDEEFF0001", { currentPosition: 30 }));
+        await Promise.all([first, second]);
+        await change("refreshPositions", false);
+        await change("refreshPositions", true, true);
+        expect(commands("/getDeviceInfo")).to.have.length(2);
+    });
+
+    it("renews rejected tokens during position refresh and resets even when one request fails", async () => {
+        let attempts = 0;
+        post.withArgs(`${BASE_URL}/userCenter/deviceService/getDeviceInfo`).callsFake(async (_url: string, params: URLSearchParams) => {
+            if (params.get("mac") === "AABBCCDDEEFF0002") throw new Error("timeout secret-token");
+            return ++attempts === 1 ? tokenError : positionResponse("AABBCCDDEEFF0001", { currentPosition: 65 });
+        });
+        await change("refreshPositions", true);
+        expect(commands("/getDeviceInfo")).to.have.length(3);
+        expect(adapter.setStateAsync.calledWith("devices.AABBCCDDEEFF0001.currentPosition", { val: 65, ack: true })).to.equal(true);
+        expect(adapter.setStateAsync.calledWith("refreshPositions", { val: false, ack: true })).to.equal(true);
+        expect(JSON.stringify([...adapter.log.error.args, ...adapter.log.warn.args])).not.to.contain("secret-token");
+    });
+
     it("reports body-level command errors and still resets buttons", async () => {
         post.withArgs(`${BASE_URL}/userCenter/deviceService/deviceControl`).resolves({ data: { retCode: "20012" } });
         await change("devices.AABBCCDDEEFF0001.open", true);

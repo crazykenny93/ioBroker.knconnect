@@ -131,7 +131,11 @@ class Knconnect extends utils.Adapter {
       write: true
     });
     this.subscribeStates("triggerScene");
-    const results = await Promise.allSettled([this.loadScenes(), this.loadDevices(), this.loadRooms()]);
+    await this.button("refreshPositions", "Refresh all blind positions");
+    this.deviceLoading = this.loadDevices();
+    const inventories = Promise.allSettled([this.loadScenes(), this.deviceLoading, this.loadRooms()]);
+    this.subscribeStates("refreshPositions");
+    const results = await inventories;
     const names = ["scene", "device", "room"];
     results.forEach((result, index) => {
       if (result.status === "rejected")
@@ -169,6 +173,23 @@ class Knconnect extends utils.Adapter {
           this.devices.set(device.mac, { mac: device.mac, deviceType: device.deviceType });
           await this.channel(`devices.${device.mac}`, device.deviceAlias || device.mac);
           await this.controls(`devices.${device.mac}`);
+          await this.state(`devices.${device.mac}.currentPosition`, {
+            name: "Cloud position (0 = open, 100 = closed)",
+            type: "number",
+            role: "value.blind",
+            read: true,
+            write: false,
+            min: 0,
+            max: 100,
+            unit: "%"
+          });
+          await this.state(`devices.${device.mac}.positionUpdatedAt`, {
+            name: "Position last fetched at",
+            type: "number",
+            role: "value.time",
+            read: true,
+            write: false
+          });
         }
         if (Array.isArray(device.childs))
           await visit(device.childs);
@@ -176,6 +197,33 @@ class Knconnect extends utils.Adapter {
     };
     await visit(response.devices);
     this.subscribeStates("devices.*");
+  }
+  async refreshPositions() {
+    try {
+      await this.deviceLoading;
+    } catch {
+      this.log.warn("KN Connect position refresh skipped because device discovery failed.");
+      return;
+    }
+    const results = await Promise.allSettled([...this.devices].map(async ([id, device]) => {
+      const response = await this.authenticatedPost(
+        "/userCenter/deviceService/getDeviceInfo",
+        device
+      );
+      if (response.mac !== device.mac)
+        throw new Error("Unexpected blind in position response");
+      const data = typeof response.deviceData === "string" ? JSON.parse(response.deviceData) : response.deviceData;
+      const position = data && typeof data === "object" && "currentPosition" in data ? data.currentPosition : void 0;
+      if (typeof position !== "number" || !Number.isFinite(position) || position < 0 || position > 100) {
+        throw new Error("Invalid cloud position");
+      }
+      await this.setStateAsync(`devices.${id}.currentPosition`, { val: position, ack: true });
+      await this.setStateAsync(`devices.${id}.positionUpdatedAt`, { val: Date.now(), ack: true });
+    }));
+    const failures = results.filter((result) => result.status === "rejected").length;
+    if (failures || !results.length) {
+      this.log.warn(`KN Connect position refresh: ${results.length - failures}/${results.length} blinds updated. Check cloud availability and position data.`);
+    }
   }
   async loadRooms() {
     const response = await this.authenticatedPost("/userCenter/areaService/getAreas");
@@ -243,6 +291,19 @@ class Knconnect extends utils.Adapter {
       } finally {
         this.setState("triggerScene", { val: null, ack: true });
       }
+      return;
+    }
+    if (relative === "refreshPositions" && state.val === true) {
+      if (!this.positionRefresh) {
+        this.positionRefresh = this.refreshPositions().finally(async () => {
+          try {
+            await this.setStateAsync("refreshPositions", { val: false, ack: true });
+          } finally {
+            this.positionRefresh = void 0;
+          }
+        });
+      }
+      await this.positionRefresh;
       return;
     }
     const [kind, code, action, extra] = relative.split(".");

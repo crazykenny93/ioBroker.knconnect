@@ -37,6 +37,9 @@ auch bei einer Umbenennung gleich.
 | `triggerScene` | Szenencode; bestehende Skripte bleiben kompatibel |
 | `devices.<deviceId>.open` / `.close` / `.stop` | `true` steuert diese Jalousie |
 | `devices.<deviceId>.targetPosition` | Zielposition 0–100 %, 0 = offen, 100 = geschlossen |
+| `refreshPositions` | `true` fragt die Cloud-Positionen aller bekannten Jalousien ab |
+| `devices.<deviceId>.currentPosition` | Nur lesbar: zuletzt erfolgreich abgefragte Cloud-Position, 0 = offen, 100 = geschlossen |
+| `devices.<deviceId>.positionUpdatedAt` | Nur lesbar: Zeitpunkt des erfolgreichen Abrufs als Unix-Zeit in Millisekunden |
 | `rooms.<areaCode>.open` / `.close` / `.stop` | `true` steuert alle zugeordneten Jalousien |
 | `rooms.<areaCode>.targetPosition` | Zielposition für alle zugeordneten Jalousien |
 | `rooms.<areaCode>.deviceIds` | JSON-Array der Jalousie-IDs, z. B. `["AABBCCDDEEFF0001"]` |
@@ -49,8 +52,14 @@ oder ungültiges JSON verhindern einen Raumbefehl; eine leere Liste steuert nich
 
 Taster werden nach dem Versuch mit `ack: true` auf `false` zurückgesetzt.
 `targetPosition` enthält den zuletzt bestätigten **Sollwert**, keine gemessene
-Position. Der Adapter fragt keine laufenden Positionsänderungen ab. Eine
-Cloud-Bestätigung belegt noch keine tatsächliche Bewegung.
+Position. Mit `setState("knconnect.0.refreshPositions", true)` werden die
+Positionen einmalig über `getDeviceInfo` gelesen. Gleichzeitige Trigger teilen
+sich einen Abruf; anschließend setzt der Adapter den Taster auf `false` zurück.
+Fehlerhafte oder fehlende Positionen überschreiben weder den bisherigen Wert
+noch dessen Abrufzeitpunkt. Die anderen Jalousien werden trotzdem abgefragt.
+Der Zeitpunkt beschreibt den Abruf, nicht die Messzeit am Motor: Die Cloud kann
+zwischengespeicherte Werte liefern. Es gibt keine automatische zyklische Abfrage.
+Eine Cloud-Bestätigung belegt noch keine tatsächliche Bewegung.
 
 ## Developer manual
 This section is intended for the developer. It can be deleted later.
@@ -160,6 +169,7 @@ Please refer to the [`dev-server` documentation](https://github.com/ioBroker/dev
     ### **WORK IN PROGRESS**
 -->
 ### **WORK IN PROGRESS**
+* Add a trigger to read all blind positions from the cloud, with per-device position and fetch timestamps.
 
 ### 0.0.4 (2026-11-14)
 * Add scene buttons, individual blind controls and persistent room assignments with room controls.
