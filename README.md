@@ -168,7 +168,7 @@ Please refer to the [`dev-server` documentation](https://github.com/ioBroker/dev
     Placeholder for the next version (at the beginning of the line):
     ### **WORK IN PROGRESS**
 -->
-### **WORK IN PROGRESS**
+### 0.0.5 (2026-11-15)
 * Add a trigger to read all blind positions from the cloud, with per-device position and fetch timestamps.
 
 ### 0.0.4 (2026-11-14)

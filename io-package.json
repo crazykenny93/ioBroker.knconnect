@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "knconnect",
-    "version": "0.0.4",
+    "version": "0.0.5",
     "news": {
+      "0.0.5": {
+        "en": "Add a trigger to read all blind positions from the cloud, with per-device position and fetch timestamps.",
+        "de": "Trigger hinzufügen, um alle Blindpositionen pro Gerät aus der Cloud zu lesen und Zeitstempel abzurufen.",
+        "ru": "Добавьте триггер для считывания всех слепых позиций из облака с указанием местоположения каждого устройства и временных отметок.",
+        "pt": "Adicione um gatilho para ler todas as posições cegas na nuvem, com data e hora por dispositivo.",
+        "nl": "Voeg een trigger toe om alle blinde posities uit de cloud te lezen, met de positie per apparaat, en om tijdstempels op te halen.",
+        "fr": "Ajoutez un déclencheur pour lire toutes les positions aveugles sur le cloud, par appareil et horodater.",
+        "it": "Aggiunga un trigger per leggere tutte le cieche dal cloud, per dispositivo e data/ora.",
+        "es": "Añada un disparador para leer todas las posiciones ciegas de la nube, con marcas de posición y hora por dispositivo.",
+        "pl": "Dodaj wyzwalacz, aby odczytać wszystkie ślepe pozycje z chmury, z pozycją na urządzenie i pobierać znaczniki czasu.",
+        "uk": "Додайте тригер для зчитування всіх сліпих позицій з хмари, з позицією для кожного пристрою та мітками часу отримання.",
+        "zh-cn": "添加触发器，从云端读取所有盲位，包括每台设备的位置和提取时间戳。"
+      },
       "0.0.4": {
         "en": "Add scene buttons, individual blind controls and persistent room assignments with room controls.\nConfirm read-only scene names and reject cloud command errors.",
         "de": "Fügen Sie Szenetasten, Rollläden und ständige Raumzuweisungen mit Raumsteuerung hinzu.\nBestätigen Sie lesbare Szenennamen und lehnen Sie Cloud-Fehler ab.",
